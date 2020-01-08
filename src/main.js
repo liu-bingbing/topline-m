@@ -9,4 +9,5 @@ new Vue({
   router,
   store,
   render: h => h(App)
+  // 将store挂载到根实例
 }).$mount('#app')
