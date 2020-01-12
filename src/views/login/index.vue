@@ -19,23 +19,29 @@
         v-if="isCountDownShow"
         slot="button"
         :time="1000*60"
-        format=" ss s"/>
+        format=" ss s"
+        @finish="isCountDownShow=false"
+        />
         <van-button
         v-else
         slot="button"
         size="small"
         type="primary"
-        round>发送验证码</van-button>
+        round
+        @click="onSendCode"
+        >发送验证码</van-button>
       </van-field>
     </van-cell-group>
     <div class="btn-wrap">
-      <van-button round type="info" @click="onLogin">登录</van-button>
+      <van-button round
+      type="info"
+      @click="onLogin">登录</van-button>
     </div>
   </div>
 </template>
 
 <script>
-import { login } from '@/api/user'
+import { login, getSmsCode } from '@/api/user'
 
 export default {
   name: 'LoginPage',
@@ -75,9 +81,31 @@ export default {
         this.$toast.fail('登陆失败')
       }
       // 4.根据接口返回结果执行后续处理
+    },
+    async onSendCode () {
+      // 1.获取手机号
+      const { mobile } = this.user
+      // 2.校验手机号是否有效
+      // 3.发送验证码
+      try {
+        // 显示倒计时
+        this.isCountDownShow = true
+        // 发送
+        await getSmsCode(mobile)
+      } catch (err) {
+        console.log(err)
+
+        // 发送失败关闭倒计时
+        this.isCountDownShow = false
+
+        if (err.response.status === 429) {
+          this.$toast('请勿频繁操作')
+          return
+        }
+        this.$toast('发送失败')
+      }
     }
   }
-
 }
 </script>
 
